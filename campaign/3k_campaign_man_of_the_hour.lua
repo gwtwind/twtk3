@@ -384,8 +384,8 @@ function man_of_the_hour:spawn_man_of_the_hour( query_faction, dilemma_keys, is_
 			self:fire_choice_dilemma(modify_faction, false, dilemma_keys); -- Spawns character based on listener from dilemma.
 		else
 			if progression_level <=3 then
-                out.design("man_of_the_hour:spawn_man_of_the_hour(): Faction rank 1-3: spawning 1-2 men of the hour.");
-                local random_moh = cm:random_number(0,2);
+                out.design("man_of_the_hour:spawn_man_of_the_hour(): Faction rank 1-3: spawning 1 man of the hour.");
+                local random_moh = cm:random_number(0,1);
 
                 for i = random_moh, 0, -1 do
                     self:spawn_character(modify_faction, false);
@@ -393,8 +393,8 @@ function man_of_the_hour:spawn_man_of_the_hour( query_faction, dilemma_keys, is_
                 out.design("man_of_the_hour:spawn_man_of_the_hour(): Number: "..tostring(math.ceil(random_moh)));
 
             elseif progression_level == 4 or progression_level == 5 then
-                out.design("man_of_the_hour:spawn_man_of_the_hour(): Faction rank 4-5: spawning 1-3 men of the hour.");
-                local random_moh = cm:random_number(0,3);
+                out.design("man_of_the_hour:spawn_man_of_the_hour(): Faction rank 4-5: spawning 1 man of the hour.");
+                local random_moh = cm:random_number(0,1);
 
                 for i = random_moh, 0, -1 do
                     self:spawn_character(modify_faction, false);
@@ -402,8 +402,8 @@ function man_of_the_hour:spawn_man_of_the_hour( query_faction, dilemma_keys, is_
                 out.design("man_of_the_hour:spawn_man_of_the_hour(): Number: "..tostring(math.ceil(random_moh)));
 
             else   
-                out.design("man_of_the_hour:spawn_man_of_the_hour(): Faction rank 6+: spawning 1-4 men of the hour.");
-                local random_moh = cm:random_number(0,4);
+                out.design("man_of_the_hour:spawn_man_of_the_hour(): Faction rank 6+: spawning 1-2 men of the hour.");
+                local random_moh = cm:random_number(0,2);
 
                 for i = random_moh, 0, -1 do
                     self:spawn_character(modify_faction, false);

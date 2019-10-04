@@ -155,7 +155,7 @@ start_historical_mission_listener(
 start_historical_mission_db_listener(
 	"3k_main_faction_yellow_turban_anding",                          -- faction key
     "3k_ytr_tutorial_mission_gong_du_1_reach_rank_2",               -- mission key
-    "ScriptEventGongDuMission0102Complete",      -- trigger event 
+    "ScriptEventGongDuMission0105Complete",      -- trigger event 
     "ScriptEventGongDuMission0107Complete"     -- completion event
 );
 --[[
@@ -551,11 +551,9 @@ start_historical_mission_cancel_listener(
     "3k_main_faction_yellow_turban_anding",
     {
         "3k_ytr_tutorial_mission_gong_du_1_defeat_army",
-        "3k_ytr_tutorial_mission_gong_du_1_research_any_technology",
         "3k_ytr_tutorial_mission_gong_du_1_recruit_captain",
         "3k_ytr_tutorial_mission_gong_du_1_have_units",
-        "3k_ytr_tutorial_mission_gong_du_1_capture_region",
-        "3k_ytr_tutorial_mission_gong_du_1_construct_any_building"
+        "3k_ytr_tutorial_mission_gong_du_1_capture_region"
     },
     "ScriptEventGongDuMission0107Complete"
 )

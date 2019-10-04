@@ -34,5 +34,3 @@ else
 		bm:out("\tNot loading advice");
 	end;
 end;
-
-require("3k_battle_mod_loader");

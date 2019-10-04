@@ -49,6 +49,10 @@ core_object = {
 	attached_events = {},
 	event_listeners = {},
 	debug_counter = 0,
+	env = false,
+
+	-- loaded mods
+	loaded_mods = {},
 	
 	-- unique counter, for use across script
 	unique_counter = 0,
@@ -113,6 +117,8 @@ function core_object:new()
 	----------------------------------------------------------
 	----------------------------------------------------------
 	
+	c.env = getfenv(1);	
+
 	c.registered_text_pointer_names = {};
 	c.cached_tooltips_for_component_states = {};
 	
@@ -375,6 +381,213 @@ end;
 function core_object:is_frontend()
 	return __game_mode == __lib_type_frontend;
 end;
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------
+--- @section Script Environment
+----------------------------------------------------------------------------
+
+--- @function get_env
+--- @desc Returns the current global lua function environment. This can be used to force other functions to have global scope.
+--- @return @table environment
+function core_object:get_env()
+	return self.env;
+end;
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------
+--- @section Mod Loading
+--- @desc Functions for loading and, in campaign, executing mod scripts. Note that @global:ModLog can be used by mods for output.
+----------------------------------------------------------------------------
+
+
+--- @function load_mods
+--- @desc Loads all mod scripts found on each of the supplied paths, setting the environment of every loaded mod to the global environment.
+--- @p ... paths, List of string paths from which to load mods from. The terminating <code>/</code> character must be included.
+--- @return @boolean All mods loaded correctly
+--- @example core:load_mods("/script/_lib/mod/", "/script/battle/mod/");
+function core_object:load_mods(...)
+
+	ModLog("");
+	ModLog("****************************");
+	ModLog("Loading Mods");
+	out.inc_tab();
+
+	local all_ok = true;
+	local out_str = false;
+
+	for i = 1, arg.n do
+		local path = arg[i];
+
+		if not is_string(path) then
+			script_error("ERROR: load_mods() called but supplied path [" .. tostring(path) .. "] is not a string");
+			out.dec_tab();
+			ModLog("****************************");
+			ModLog("");
+			return false;
+		end;
+
+		package.path = path .. "?.lua;" .. package.path;
+
+		local file_str = effect.filesystem_lookup(path, "*.lua");
+
+		for filename in string.gmatch(file_str, '([^,]+)') do
+			local ok, err = pcall(function(filename) self:load_mod_script(filename) end, filename);
+			
+			if ok then
+				ModLog("Mod [" .. tostring(filename) .. "] loaded successfully");
+			else
+				ModLog("Failed to load mod: [" .. tostring(filename) .. "], error is: " .. tostring(err));
+				all_ok = false;
+			end;
+		end;
+	end;
+
+	out.dec_tab();
+	ModLog("****************************");
+	ModLog("");
+
+	return all_ok;
+end;
+
+
+-- internal function to load an individual mod script
+function core_object:load_mod_script(filename)
+	local pointer = 1;
+
+	local filename_for_out = filename;
+	
+	while true do
+		local next_separator = string.find(filename, "\\", pointer) or string.find(filename, "/", pointer);
+		
+		if next_separator then
+			pointer = next_separator + 1;
+		else
+			if pointer > 1 then
+				filename = string.sub(filename, pointer);
+			end;
+			break;
+		end;
+	end;
+	
+	local suffix = string.sub(filename, string.len(filename) - 3);
+	
+	if string.lower(suffix) == ".lua" then
+		filename = string.sub(filename, 1, string.len(filename) - 4);
+	end;
+
+	-- Avoid loading more than once
+	if package.loaded[filename] then
+		return false;
+	end
+	
+	-- Loads a Lua chunk from the file
+	local loaded_file, err = loadfile(filename);
+	
+	-- Make sure something was loaded from the file
+	if loaded_file then
+		-- output
+		local out_str = "Loading mod file [" .. filename_for_out .. "]";
+		ModLog(out_str);
+		
+		-- Set the environment of the Lua chunk to the global environment
+		setfenv(loaded_file, self:get_env());
+		-- Make sure the file is set as loaded
+		package.loaded[filename] = true;
+		-- Execute the loaded Lua chunk so the functions within are registered
+		out.inc_tab();
+		loaded_file();
+		out.dec_tab();
+
+		table.insert(self.loaded_mods, filename);
+
+		return true;
+	else
+		-- output
+		local out_str = "Failed to load mod file [" .. filename_for_out .. "], error is: " .. tostring(err);
+		ModLog(out_str);
+		return false;
+	end;
+end;
+
+
+--- @function execute_mods
+--- @desc Attempts to execute a function of the same name as the filename of each mod that has previously been loaded by @core_object:load_mods. For example, if mods have been loaded from <code>mod_a.lua</code>, <code>mod_b.lua</code> and <code>mod_c.lua</code>, the functions <code>mod_a()</code>, <code>mod_b()</code> and <code>mod_c()</code> will be called, if they exist. This can be used to start the execution of mod scripts at an appropriate time, particularly during campaign script startup.
+--- @desc One or more arguments can be passed to <code>execute_mods</code>, which are in-turn passed to the mod functions being executed.
+--- @p ... arguments, Arguments to be passed to mod function(s).
+--- @return @boolean No errors reported
+function core_object:execute_mods(...)
+
+	ModLog("");
+	ModLog("****************************");
+	ModLog("Executing Mods");
+	out.inc_tab();
+
+	local env = self:get_env();
+
+	for i = 1, #self.loaded_mods do
+		local current_mod_name = self.loaded_mods[i];
+
+		-- proceed if there's a function with the same name as the mod file
+		if is_function(env[current_mod_name]) then
+			ModLog("Executing mod function " .. current_mod_name .. "()");
+			out.inc_tab();
+
+			-- call the function
+			local ok, result = pcall(env[current_mod_name], unpack(arg));
+
+			out.dec_tab();
+
+			if ok then
+				ModLog(current_mod_name .. "() executed successfully");
+			else
+				ModLog("ERROR: " .. current_mod_name .. "() failed while executing with error: " .. result);
+			end;
+		else
+			ModLog(current_mod_name .. "() not found, continuing");
+		end;
+	end;
+
+	out.dec_tab();
+	ModLog("****************************");
+	ModLog("");
+end;
+
+
+--- @function is_mod_loaded
+--- @desc Returns whether a mod with the supplied name is loaded. The path may be omitted.
+--- @p @string mod name
+--- @return @boolean mod is loaded
+function core_object:is_mod_loaded(mod_name)
+	local loaded_mods = self.loaded_mods;
+
+	for i = 1, #loaded_mods do
+		if loaded_mods[i] == mod_name then
+			return true;
+		end;
+	end;
+
+	return false;
+end;
+
+
+
 
 
 

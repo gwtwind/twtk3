@@ -154,7 +154,7 @@ start_historical_mission_listener(
 start_historical_mission_db_listener(
 	"3k_main_faction_yellow_turban_rebels",                          -- faction key
     "3k_ytr_tutorial_mission_he_yi_1_reach_rank_2",               -- mission key
-    "ScriptEventHeYiMission0102Complete",      -- trigger event 
+    "ScriptEventHeYiMission0105Complete",      -- trigger event 
     "ScriptEventHeYiMission0107Complete"     -- completion event
 );
 
@@ -552,11 +552,9 @@ start_historical_mission_cancel_listener(
     "3k_main_faction_yellow_turban_rebels",
     {
         "3k_ytr_tutorial_mission_he_yi_1_defeat_army",
-        "3k_ytr_tutorial_mission_he_yi_1_research_any_technology",
         "3k_ytr_tutorial_mission_he_yi_1_recruit_captain",
         "3k_ytr_tutorial_mission_he_yi_1_have_units",
-        "3k_ytr_tutorial_mission_he_yi_1_capture_region",
-        "3k_ytr_tutorial_mission_he_yi_1_construct_any_building"
+        "3k_ytr_tutorial_mission_he_yi_1_capture_region"
     },
     "ScriptEventHeYiMission0107Complete"
 )

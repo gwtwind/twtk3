@@ -43,4 +43,3 @@ require("3k_campaign_tutorial");
 require("3k_campaign_historical_events");
 require("3k_campaign_cdir_events_manager");
 require("3k_extended_tutorial");
-require("3k_campaign_mod_scripting");

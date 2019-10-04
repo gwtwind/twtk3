@@ -409,9 +409,12 @@ function ancillaries:get_num_starting_ancillaries( query_character )
 		max_ancillaries = self.char_start_ancillaries_ceo_node_to_min_max[ ceo_node_key ].max or max_ancillaries;
 		
 		output("Using Wealth Trait to get amount - " .. min_ancillaries .. "/".. max_ancillaries);
+	elseif query_character:faction():subculture() == "3k_main_subculture_yellow_turban" then
+		min_ancillaries = 0 or 1;
+		max_ancillaries = 1 or 2;
     end;
 
-    return cm:random_number( max_ancillaries, min_ancillaries );
+    return math.round(cm:random_number( max_ancillaries, min_ancillaries ), 0);
 end;
 
 

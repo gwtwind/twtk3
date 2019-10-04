@@ -111,3 +111,9 @@ out("");
 
 -- automatic creation of core object
 core = core_object:new();
+
+
+
+
+-- load mods (do this last)
+force_require("lib_mod_loader");

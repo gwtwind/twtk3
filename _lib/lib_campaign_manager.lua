@@ -31,7 +31,6 @@ __campaign_manager = nil;
 
 campaign_manager = {				-- default values should not be nil, otherwise they'll fail if looked up
 	name = "",
-	env = false,
 	cinematic = false,
 	factions = {},
 	game_is_created = false,
@@ -214,7 +213,6 @@ function campaign_manager:new(name)
 	self.__index = self;
 	__campaign_manager = cm;
 	
-	cm.env = getfenv(1);
 	cm.name = name;
 	cm.factions = {};
 	cm.pre_first_tick_callbacks = {};
@@ -1755,7 +1753,7 @@ function campaign_manager:load_faction_script(scriptname, single_player_only)
 		output("Loading faction script " .. scriptname .. ".lua");
 		inc_tab();
 		
-		setfenv(file, self.env);
+		setfenv(file, core:get_env());
 		package.loaded[scriptname] = true;
 		file();
 		
